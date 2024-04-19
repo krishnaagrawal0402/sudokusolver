@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Solver</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+.menu {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.menu button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.menu button:hover {
+    background-color: #0056b3;
+}
+
+#sudoku-board {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+#solve-btn {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#solve-btn:hover {
+    background-color: #218838;
+}
+
+#result {
+    text-align: center;
+    margin-top: 20px;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sudoku Solver</h1>
+        <div class="menu">
+            <button id="preset-btn">Use Preset Sudoku</button>
+            <button id="custom-btn">Enter Custom Sudoku</button>
+        </div>
+        <div id="sudoku-board">
+            <!-- Sudoku board will be generated dynamically -->
+        </div>
+        <button id="solve-btn">Solve Sudoku</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function printSudoku9x9(arr) {
+            let output = "-------------------------\n";
+            for (let row of arr) {
+                output += row.join(" ") + "\n";
+            }
+            output += "-------------------------";
+            console.log(output);
+        }
+
+        function canPlace9x9(arr, row, col, n) {
+            for (let i = 0; i < 9; i++) {
+                if (arr[row][i] === n || arr[i][col] === n || arr[3*Math.floor(row/3) + Math.floor(i/3)][3*Math.floor(col/3) + i%3] === n) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function nextEmpty(arr, row, col) {
+            for (let i = row; i < 9; i++) {
+                for (let j = col; j < 9; j++) {
+                    if (arr[i][j] === 0) {
+                        return [i, j];
+                    }
+                }
+                col = 0;
+            }
+            return [-1, -1];
+        }
+
+        function solveSudoku9x9(arr) {
+            let [row, col] = nextEmpty(arr, 0, 0);
+            if (row === -1 && col === -1) {
+                return true; // Puzzle solved
+            }
+            for (let n = 1; n <= 9; n++) {
+                if (canPlace9x9(arr, row, col, n)) {
+                    arr[row][col] = n;
+                    if (solveSudoku9x9(arr)) {
+                        return true; // Puzzle solved
+                    }
+                    arr[row][col] = 0; // Backtrack
+                }
+            }
+            return false; // No solution found
+        }
+
+        function displayResult(result) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerText = result ? 'Sudoku solved successfully!' : 'No solution found for this Sudoku.';
+        }
+
+        function solveSudoku() {
+            const sudokuBoard = [
+                [5, 3, 0, 0, 7, 0, 0, 0, 0],
+                [6, 0, 0, 1, 9, 5, 0, 0, 0],
+                [0, 9, 8, 0, 0, 0, 0, 6, 0],
+                [8, 0, 0, 0, 6, 0, 0, 0, 3],
+                [4, 0, 0, 8, 0, 3, 0, 0, 1],
+                [7, 0, 0, 0, 2, 0, 0, 0, 6],
+                [0, 6, 0, 0, 0, 0, 2, 8, 0],
+                [0, 0, 0, 4, 1, 9, 0, 0, 5],
+                [0, 0, 0, 0, 8, 0, 0, 7, 9]
+            ];
+
+            if (solveSudoku9x9(sudokuBoard)) {
+                printSudoku9x9(sudokuBoard);
+                displayResult(true);
+            } else {
+                displayResult(false);
+            }
+        }
+
+        function presetSudoku() {
+            solveSudoku();
+        }
+
+        function customSudoku() {
+            const sudokuBoard = [];
+            console.log("Enter the Sudoku board (9x9), use 0 for empty cells:");
+            for (let i = 0; i < 9; ++i) {
+                const row = [];
+                for (let j = 0; j < 9; ++j) {
+                    row.push(parseInt(prompt(`Enter value for cell (${i + 1},${j + 1}):`)) || 0);
+                }
+                sudokuBoard.push(row);
+            }
+            if (solveSudoku9x9(sudokuBoard)) {
+                printSudoku9x9(sudokuBoard);
+                displayResult(true);
+            } else {
+                displayResult(false);
+            }
+        }
+
+        document.getElementById('preset-btn').addEventListener('click', presetSudoku);
+        document.getElementById('custom-btn').addEventListener('click', customSudoku);
+    </script>
+</body>
+</html>
